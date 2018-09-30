@@ -20,10 +20,17 @@ public class GetInvesmentDays {
             endDate.setTime(formatter.parse(stringEndDate));
             while (endDate.after(startDate) || endDate.equals(startDate)) {
                 if (startDate.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY) {
+                    int month = startDate.get(Calendar.MONTH);
+                    int year = startDate.get(Calendar.YEAR);
+                    int day = startDate.get(Calendar.DAY_OF_MONTH);
+                    int monthLastThursday = getMonthLastThursday(startDate, month, year);
 
-                    Calendar invesmentDate = checkLastMonthDay(startDate);
-                    dates.add(formatter.format(invesmentDate.getTime()));
+                    if(day == monthLastThursday){
+                        startDate.add(Calendar.DATE, 1);
+                        dates.add(formatter.format(startDate.getTime()));
+                    }
                 }
+
                 startDate.add(Calendar.DATE, 1);
             }
         }
@@ -33,12 +40,17 @@ public class GetInvesmentDays {
         return (dates);
     }
 
-    public static Calendar checkLastMonthDay(Calendar startDate){
-        int currentDay = startDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        int finalMonthDay = startDate.get(Calendar.DAY_OF_MONTH);
-        if(currentDay == finalMonthDay){
-            startDate.add(Calendar.DATE, 1);
+
+    public static int getMonthLastThursday(Calendar startDate, int month, int year){
+        Calendar cal = Calendar.getInstance();
+        cal.set( year, month + 1, 1 );
+        cal.add(Calendar.DAY_OF_MONTH, -( cal.get( Calendar.DAY_OF_WEEK ) % 7 + 2 ) );
+        int finalMonthDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        int monthLastThursday = cal.get(Calendar.DAY_OF_MONTH);
+        //no calcula bien en algunos casos, así que hacemos este check
+        if(finalMonthDay - monthLastThursday >= 7){
+            monthLastThursday = finalMonthDay;
         }
-        return (startDate);
+        return (monthLastThursday);
     }
 }
